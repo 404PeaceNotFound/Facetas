@@ -43,6 +43,7 @@ class Game:
         
         self.combat_sys = None
         self.active_dialog = None
+        self.dialog_active = False
         self.victory_count = 0
 
     def run(self):
@@ -76,7 +77,8 @@ class Game:
 
             elif self.state == STATE_CREDITS:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                     self.running = False
+                    # self.running = Fal
+                    self.state = STATE_MENU
 
             elif self.state == STATE_EXPLORE:
                 pass
@@ -85,6 +87,7 @@ class Game:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
                     self.state = STATE_EXPLORE
                     self.active_dialog = None
+                    self.dialog_active = True # isso significa que o diálogo já aconteceu
 
             elif self.state == STATE_COMBAT:
                 self.combat_sys.handle_input(event)
@@ -97,12 +100,15 @@ class Game:
         if self.state == STATE_EXPLORE:
             self.player.update()
             self.camera.update(self.player.rect)
-            
+
             # Checar colisão NPC
             for npc in self.npcs:
                 if self.player.rect.colliderect(npc.rect):
-                    self.state = STATE_DIALOG
-                    self.active_dialog = npc.text
+                    
+                    # caso o diálogo já tenha aparecido, ele não vai aparecer mais 
+                    if not self.dialog_active:
+                        self.state = STATE_DIALOG
+                        self.active_dialog = npc.text
             
             # Checar colisão Inimigo (Trigger Combate)
             for enemy in self.enemies:
