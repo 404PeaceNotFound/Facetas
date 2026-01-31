@@ -1,101 +1,100 @@
 import pygame
-from constants import *
+from constants import HEAVY_ATTACK_COOLDOWN
 
 class CombatSystem:
     def __init__(self, player, enemy):
         self.player = player
         self.enemy = enemy
         self.round = 1
-        self.turn = "PLAYER" # PLAYER ou ENEMY
-        self.log = "Inicio do Combate!"
+        self.state = "INPUT"   # INPUT, WAIT, ENEMY
         self.actions = ["Ataque Basico", "Ataque Pesado", "Defesa"]
-        self.selected_action = 0
+        self.selected = 0
         self.is_defending = False
+        self.log = "Início do combate"
         self.finished = False
-        self.result = None # 'WIN' ou 'LOSE'
-        
-        # Timer simples para feedback
-        self.feedback_timer = 0
-        self.state = "INPUT" # INPUT, ANIMATION, ENEMY_TURN
-
-    def update(self):
-        if self.feedback_timer > 0:
-            self.feedback_timer -= 1
-            if self.feedback_timer == 0:
-                if self.state == "ANIMATION":
-                    self.end_player_turn()
-                elif self.state == "ENEMY_TURN":
-                    self.enemy_action()
-            return
+        self.result = None
+        self.wait_timer = 0  # frames to simulate delay
 
     def handle_input(self, event):
-        if self.state != "INPUT": return
-
+        if self.state != "INPUT" or self.finished:
+            return
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                self.selected_action = (self.selected_action - 1) % len(self.actions)
+                self.selected = (self.selected - 1) % len(self.actions)
             elif event.key == pygame.K_RIGHT:
-                self.selected_action = (self.selected_action + 1) % len(self.actions)
+                self.selected = (self.selected + 1) % len(self.actions)
             elif event.key == pygame.K_RETURN:
-                self.execute_player_action()
+                self.player_action()
 
-    def execute_player_action(self):
-        action = self.actions[self.selected_action]
-        
+    def player_action(self):
+        action = self.actions[self.selected]
         if action == "Ataque Pesado" and self.player.heavy_cd > 0:
-            self.log = "Habilidade em Cooldown!"
+            self.log = "Ataque pesado em cooldown"
             return
 
-        damage = 0
+        dmg = 0
         self.is_defending = False
 
-        if action == "Ataque Básico":
-            damage = 1
-            self.log = "Você usou Ataque Básico!"
+        if action == "Ataque Basico":
+            dmg = 1
+            self.log = "Você usou Ataque Básico"
         elif action == "Ataque Pesado":
-            damage = 2
-            self.player.heavy_cd = HEAVY_ATTACK_COOLDOWN + 1 # +1 pois decrements no fim do round
-            self.log = "Você usou Ataque Pesado!"
+            dmg = 2
+            self.player.heavy_cd = HEAVY_ATTACK_COOLDOWN + 1
+            self.log = "Você usou Ataque Pesado"
         elif action == "Defesa":
             self.is_defending = True
-            self.log = "Você está defendendo!"
+            self.log = "Você está defendendo"
 
-        if damage > 0:
-            self.enemy.hp -= damage
-            # Flash effect simulated by changing log
+        if dmg > 0:
+            self.enemy.hp -= dmg
+            if self.enemy.hp <= 0:
+                self.enemy.alive = False
+                self.finished = True
+                self.result = "WIN"
+                return
 
-        self.state = "ANIMATION"
-        self.feedback_timer = 30 # 1 segundo de espera
+        # passar para turno do inimigo com pequeno delay
+        self.state = "WAIT"
+        self.wait_timer = 30
 
-    def end_player_turn(self):
-        if self.enemy.hp <= 0:
-            self.finished = True
-            self.result = "WIN"
+    def update(self):
+        if self.finished:
             return
-        
-        self.state = "ENEMY_TURN"
-        self.log = "Turno do Inimigo..."
-        self.feedback_timer = 30
 
-    def enemy_action(self):
+        if self.wait_timer > 0:
+            self.wait_timer -= 1
+            if self.wait_timer == 0:
+                # se inimigo ainda vivo, ele ataca
+                if self.enemy.alive:
+                    self.enemy_turn()
+                else:
+                    self.finished = True
+                    self.result = "WIN"
+            return
+
+        # reduzir cooldowns quando volta ao INPUT
+        if self.state == "ENEMY":
+            # já processado enemy_turn, voltar para input
+            self.state = "INPUT"
+            self.round += 1
+            if self.player.heavy_cd > 0:
+                self.player.heavy_cd -= 1
+
+    def enemy_turn(self):
         dmg = self.enemy.damage
         if self.is_defending:
             dmg //= 2
-            self.log = f"Inimigo atacou! Dano reduzido para {dmg}."
+            self.log = f"Inimigo atacou! Dano reduzido para {dmg}"
         else:
-            self.log = f"Inimigo atacou! Dano {dmg}."
+            self.log = f"Inimigo atacou! Dano {dmg}"
 
         self.player.hp -= dmg
-        
         if self.player.hp <= 0:
             self.finished = True
             self.result = "LOSE"
             return
 
-        # Fim do round
-        self.round += 1
-        if self.player.heavy_cd > 0:
-            self.player.heavy_cd -= 1
-        
-        self.state = "INPUT"
-        self.turn = "PLAYER"
+        # fim do turno inimigo
+        self.is_defending = False
+        self.state = "ENEMY"
