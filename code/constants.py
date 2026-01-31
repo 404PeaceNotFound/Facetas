@@ -1,0 +1,34 @@
+
+# Configurações de Tela
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+TITLE = "Facetas"
+
+# Mapa
+MAP_WIDTH = 800  # Mapa maior que a tela
+MAP_HEIGHT = 600
+
+# Cores
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+GRAY = (50, 50, 50)
+LIGHT_GRAY = (200, 200, 200)
+
+# Estados do Jogo
+STATE_MENU = 0
+STATE_EXPLORE = 1
+STATE_COMBAT = 2
+STATE_DIALOG = 3
+STATE_GAME_OVER = 4
+STATE_CREDITS = 5
+STATE_VICTORY = 6
+
+# Gameplay
+PLAYER_SPEED = 5
+PLAYER_MAX_HP = 10
+HEAVY_ATTACK_COOLDOWN = 2

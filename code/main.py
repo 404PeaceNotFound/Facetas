@@ -1,18 +1,5 @@
-import pygame
-pygame.init()
+from game import Game
 
-screen_width = 1280
-screen_height = 720
-
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption('Facetas')
-
-run = True
-
-while run:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-
-pygame.quit()
-
+if __name__ == "__main__":
+    game = Game()
+    game.run()
