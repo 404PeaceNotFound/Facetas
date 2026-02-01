@@ -63,7 +63,8 @@ class Game:
 
         elif self.state == STATE_CREDITS:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                self.running = False
+                # self.running = False
+                self.state = STATE_MENU
 
         elif self.state == STATE_EXPLORE:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e and self.active_dialog:
@@ -123,7 +124,9 @@ class Game:
 
         if self.state == STATE_CREDITS:
             self.screen.fill(BLACK)
-            self.ui.draw_text("Desenvolvido por: AI Assistant", True, 50, 50)
+            self.ui.draw_text("Desenvolvido por:", "big", 50, 50)
+            self.ui.draw_text("Game Design: Thiago & Dudu", "small", 50, 150)
+            self.ui.draw_text("Game Dev: Yuri & Vitor", "small", 50, 200)
             self.ui.draw_text("Pressione ENTER para Sair", False, 50, 500, RED)
             pygame.display.flip()
             return
