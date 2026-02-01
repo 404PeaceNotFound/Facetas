@@ -18,8 +18,10 @@ class UI:
         self.screen.blit(surf, rect)
 
     def draw_menu(self, options, selected_index):
-        self.screen.fill(BLACK)
-        self.draw_text("Facetas", True, SCREEN_WIDTH // 2, 100, center=True)
+        self.background_image = pygame.image.load("./assets/menu_background.jpg")
+        self.background_image = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen.blit(self.background_image, (0, 0))
+        self.draw_text("Facetas", 100, SCREEN_WIDTH // 2, 100, center=True)
         for i, opt in enumerate(options):
             color = YELLOW if i == selected_index else WHITE
             self.draw_text(opt, False, SCREEN_WIDTH // 2, 220 + i * 40, color, center=True)

@@ -80,7 +80,6 @@ class Game:
                 self.state = STATE_MENU
 
         elif self.state == STATE_DIALOG:
-            # Avança o texto ao pressionar E
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
                 # Verifica se ainda tem páginas
                 if self.current_page_index < len(self.dialog_pages) - 1:
@@ -89,6 +88,10 @@ class Game:
                     # Fim do diálogo
                     self.state = STATE_EXPLORE
                     self.dialogo_ja_apareceu = True
+                    for npc in self.npcs:
+                        if self.player.rect.colliderect(npc.rect):
+                            npc.active = False
+                    
                     self.dialog_pages = []
 
         elif self.state == STATE_COMBAT and self.combat:
