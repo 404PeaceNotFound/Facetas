@@ -1,2 +1,6 @@
 # pasta de cache do pygame
 __pycache__/
+build/
+
+# arquivo de compilação
+setup.py
