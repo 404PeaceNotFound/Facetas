@@ -1,2 +1,4 @@
 # pasta de cache do pygame
 __pycache__/
+build/
+setup.py

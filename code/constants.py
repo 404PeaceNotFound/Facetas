@@ -1,3 +1,11 @@
+import os
+
+# Isso pega o caminho da pasta onde o jogo está rodando
+BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
+
+def get_asset_path(relative_path):
+    return os.path.join(BASE_DIR, relative_path)
+
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 30
@@ -28,3 +36,6 @@ STATE_DIALOG = 5
 PLAYER_SPEED = 5
 PLAYER_MAX_HP = 100
 HEAVY_ATTACK_COOLDOWN = 2
+
+STATE_INTRO1 = "intro1"
+STATE_INTRO2 = "intro2"

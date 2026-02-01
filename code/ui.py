@@ -8,7 +8,7 @@ class UI:
         self.font_big = pygame.font.Font(None, 48)
         self.font_small = pygame.font.Font(None, 24)
         base_dir = os.path.dirname(__file__)
-        img_path = os.path.join(base_dir, "assets", "images", "menu_background.jpg")
+        img_path = "assets/images/menu_background.jpg"
         print(f"DEBUG: Tentando carregar imagem de: {img_path}")
 
         try:

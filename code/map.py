@@ -1,5 +1,5 @@
 import pygame
-from constants import SCREEN_WIDTH, MAP_WIDTH, MAP_HEIGHT, WHITE
+from constants import SCREEN_WIDTH, MAP_WIDTH, MAP_HEIGHT, WHITE, get_asset_path
 
 class Camera:
     def __init__(self):
@@ -26,7 +26,7 @@ class GameMap:
         self.floor_y = 500
 
         try:
-            self.bg_image = pygame.image.load('code/assets/images/cenario2.png').convert_alpha()
+            self.bg_image = pygame.image.load(get_asset_path('assets/images/cenario2.png')).convert_alpha()
             # Opcional: Redimensionar para a altura da tela mantendo a proporção ou forçando
             # Aqui forçamos a largura do mapa (2000) e altura da tela (600)
             self.bg_image = pygame.transform.scale(self.bg_image, (self.width, self.height))
