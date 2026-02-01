@@ -7,6 +7,12 @@ class NPC:
         self.color = GREEN
         self.text = text
         self.active = True
+        global img_enemy
+        img_enemy = pygame.image.load(f'Facetas/code/assets/images/inimigo.webp').convert_alpha()
+        global enemyCaracterRedimision
+        enemyCaracterRedimision = pygame.transform.scale(img_enemy, (200, 200))
+        global enemyCaracterflip
+        enemyCaracterflip = pygame.transform.flip(enemyCaracterRedimision, True, False)
 
     def draw(self, screen, cam_x):
         if not self.active:
@@ -16,7 +22,7 @@ class NPC:
         pygame.draw.rect(screen, self.color, r)
 
 class Enemy:
-    def __init__(self, x, hp, damage, is_boss=False, y=400, w=60, h=100):
+    def __init__(self, x, hp, damage, is_boss=False, y=350, w=60, h=100):
         self.rect = pygame.Rect(x, y, w, h)
         self.is_boss = is_boss
         self.color = YELLOW if is_boss else RED
@@ -30,7 +36,8 @@ class Enemy:
             return
         r = self.rect.copy()
         r.x += cam_x
-        pygame.draw.rect(screen, self.color, r)
+        #pygame.draw.rect(screen, self.color, r)
+        screen.blit(enemyCaracterflip, r)
         if self.is_boss:
             pygame.draw.rect(screen, WHITE, r, 3)
 

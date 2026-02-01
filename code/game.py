@@ -16,14 +16,25 @@ class Game:
 
         self.menu_options = ["Start", "Créditos"]
         self.menu_index = 0
+        
+        # Carregamento das imagens de introdução
+        try:
+            self.img_intro1 = pygame.image.load('Facetas/code/assets/images/historia1.png').convert_alpha()
+            self.img_intro2 = pygame.image.load('Facetas/code/assets/images/historia2.png').convert_alpha()
+            self.img_intro1 = pygame.transform.scale(self.img_intro1, (SCREEN_WIDTH, SCREEN_HEIGHT))
+            self.img_intro2 = pygame.transform.scale(self.img_intro2, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        except:
+            print("Erro ao carregar imagens de introdução. Usando superfícies vazias.")
+            self.img_intro1 = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+            self.img_intro2 = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
 
         self.running = True
         self.state = STATE_MENU
         self.victory = False
         
-        # Variáveis para controle de diálogo
         self.dialog_pages = []
         self.current_page_index = 0
+        self.dialogo_ja_apareceu = False
         
         self.reset_world()
 
@@ -32,16 +43,14 @@ class Game:
         self.map = GameMap()
         self.camera = Camera()
         self.enemies = [
-            Enemy(600, hp=4, damage=4),
-            Enemy(1200, hp=6, damage=6), 
-            Enemy(1800, hp=10, damage=10, is_boss=True)
+            Enemy(600, hp=4, damage=1),
+            Enemy(1200, hp=6, damage=2), 
+            Enemy(1800, hp=10, damage=3, is_boss=True)
         ]
-        # NPC com texto quebrado por \n
         self.npcs = [
-            NPC(300, "Cuidado! Inimigos à frente.\nAs setas selecionam a ação.\nPressione 'Enter' para usar a ação.")
+            NPC(300, "Cuidado! Inimigos à frente.\nAs setas selecionam a ação.\nPressione 'Enter' para lutar.")
         ]
         self.combat = None
-        self.dialogo_ja_apareceu = False
         self.victory = False
 
     def run(self):
@@ -49,7 +58,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.running = False
                 else:
                     self.handle_event(event)
@@ -71,22 +80,23 @@ class Game:
                 elif event.key == pygame.K_RETURN:
                     if self.menu_index == 0:
                         self.reset_world()
-                        self.state = STATE_EXPLORE
+                        self.state = STATE_INTRO1 
                     else:
                         self.state = STATE_CREDITS
 
-        elif self.state == STATE_CREDITS:
+        elif self.state == STATE_INTRO1:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                self.state = STATE_MENU
+                self.state = STATE_INTRO2
+
+        elif self.state == STATE_INTRO2:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                self.state = STATE_EXPLORE
 
         elif self.state == STATE_DIALOG:
-            # Avança o texto ao pressionar E
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-                # Verifica se ainda tem páginas
                 if self.current_page_index < len(self.dialog_pages) - 1:
                     self.current_page_index += 1
                 else:
-                    # Fim do diálogo
                     self.state = STATE_EXPLORE
                     self.dialogo_ja_apareceu = True
                     self.dialog_pages = []
@@ -103,25 +113,23 @@ class Game:
             self.player.update()
             self.camera.update_follow(self.player.rect)
 
-            # Colisão NPC -> Dialogo
+            # Colisão NPC
             for npc in self.npcs:
                 if npc.active and self.player.rect.colliderect(npc.rect):
                     if not self.dialogo_ja_apareceu:
                         self.state = STATE_DIALOG
-                        # Divide o texto do NPC pelo caractere \n
-                        raw_text = npc.text
-                        self.dialog_pages = raw_text.split('\n')
+                        self.dialog_pages = npc.text.split('\n')
                         self.current_page_index = 0
                     break
 
-            # Colisão Inimigo -> Combate
+            # Colisão Inimigo
             for e in self.enemies:
                 if e.alive and self.player.rect.colliderect(e.rect):
                     self.start_combat(e)
                     break
 
         elif self.state == STATE_COMBAT and self.combat:
-            self.combat.update()
+            self.combat.update() # Lógica sem precisar da screen aqui
             if self.combat.finished:
                 if self.combat.result == "WIN":
                     self.combat.enemy.alive = False
@@ -133,53 +141,56 @@ class Game:
                 else:
                     self.state = STATE_GAME_OVER
                 
-                # Reseta câmera para seguir o player após combate
                 self.camera.update_follow(self.player.rect)
                 self.combat = None
 
     def start_combat(self, enemy):
-        # Centraliza a câmera na posição original do inimigo (centro da arena)
-        self.camera.center_on(enemy.rect.centerx)
         self.state = STATE_COMBAT
-        
-        # O construtor do CombatSystem agora posiciona os bonecos
         self.combat = CombatSystem(self.player, enemy)
 
     def draw(self):
+        # 1. Telas que cobrem tudo (Menu e Intro)
         if self.state == STATE_MENU:
             self.ui.draw_menu(self.menu_options, self.menu_index)
             pygame.display.flip()
             return
 
-        if self.state == STATE_CREDITS:
-            self.screen.fill(BLACK)
-            self.ui.draw_text("Créditos", True, 50, 50)
-            self.ui.draw_text("Game Design: Thiago & Dudu", "small", 50, 150)
-            self.ui.draw_text("Game Dev: Yuri & Vitor", "small", 50, 200)
-            self.ui.draw_text("Pressione ENTER para Sair", False, 50, 500, RED)
+        if self.state == STATE_INTRO1:
+            self.screen.blit(self.img_intro1, (0, 0))
             pygame.display.flip()
             return
 
-        # Desenho do Mundo
+        if self.state == STATE_INTRO2:
+            self.screen.blit(self.img_intro2, (0, 0))
+            pygame.display.flip()
+            return
+
+        # 2. LIMPEZA DA TELA
         self.screen.fill(BLACK)
-        self.map.draw(self.screen, self.camera.x)
 
-        for npc in self.npcs:
-            npc.draw(self.screen, self.camera.x)
-        for e in self.enemies:
-            e.draw(self.screen, self.camera.x)
-        self.player.draw(self.screen, self.camera.x)
+        # 3. CAMADA DE FUNDO E PERSONAGENS
+        if self.state == STATE_COMBAT and self.combat:
+            # DESENHA FUNDO DA BATALHA
+            self.screen.blit(self.combat.bg_image, (0, 0))
+            
+            # DESENHA PERSONAGENS NA ARENA (Sem offset de câmera)
+            self.player.draw(self.screen, 0)
+            self.combat.enemy.draw(self.screen, 0)
+        else:
+            # MUNDO NORMAL (Exploração)
+            self.map.draw(self.screen, self.camera.x)
+            for npc in self.npcs:
+                npc.draw(self.screen, self.camera.x)
+            for e in self.enemies:
+                e.draw(self.screen, self.camera.x)
+            self.player.draw(self.screen, self.camera.x)
 
+        # 4. CAMADA DE UI (Sempre por cima)
         if self.state == STATE_DIALOG:
-            # Passamos o texto atual e contagem de páginas para UI
             current_text = self.dialog_pages[self.current_page_index]
             self.ui.draw_dialog(current_text, self.current_page_index, len(self.dialog_pages))
 
         if self.state == STATE_COMBAT and self.combat:
-            # Desenha Arena (opcional, para debug visual)
-            # arena_rect = pygame.Rect(SCREEN_WIDTH//2 - 200, SCREEN_HEIGHT//2 - 150, 400, 300)
-            # pygame.draw.rect(self.screen, (30,30,30), arena_rect, 1)
-            
             self.ui.draw_combat_hud(
                 self.player.hp,
                 self.combat.enemy.hp,
@@ -200,3 +211,7 @@ class Game:
             self.ui.draw_text("Enter p/ Menu", False, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50, center=True)
 
         pygame.display.flip()
+
+if __name__ == "__main__":
+    game = Game()
+    game.run()
