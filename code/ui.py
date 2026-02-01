@@ -18,7 +18,7 @@ class UI:
         self.screen.blit(surf, rect)
 
     def draw_menu(self, options, selected_index):
-        self.background_image = pygame.image.load("./assets/menu_background.jpg")
+        self.background_image = pygame.image.load("./Facetas/code/assets/images/menu_background.jpg")
         self.background_image = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
         self.screen.blit(self.background_image, (0, 0))
         self.draw_text("Facetas", 100, SCREEN_WIDTH // 2, 100, center=True)
