@@ -36,7 +36,6 @@ class Enemy:
             self.load_frames(w, h)
             
             if self.is_boss:
-                # Redimensiona todos os frames carregados se for Boss
                 self.frames = [pygame.transform.scale(f, (int(w * 1.5), int(h * 1.5))) for f in self.frames]
                 self.rect.size = (int(w * 1.5), int(h * 1.5))
         except:
@@ -62,17 +61,14 @@ class Enemy:
         if not self.alive:
             return
             
-        # Atualiza a animação antes de desenhar
         self.update_animation()
             
         r = self.rect.copy()
         r.x += cam_x
 
         if self.frames:
-            # Desenha o frame atual da lista de animação
             screen.blit(self.frames[self.current_frame], r)
         else:
-            # Fallback visual
             pygame.draw.rect(screen, self.color, r)
             
         if self.is_boss:

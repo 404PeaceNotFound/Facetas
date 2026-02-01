@@ -32,7 +32,7 @@ class UI:
         if self.bg_menu:
             self.screen.blit(self.bg_menu, (0, 0))
         else:
-            self.screen.fill(BLACK) # Se a imagem falhou, pinta de preto
+            self.screen.fill(BLACK)
 
         self.draw_text("Facetas", True, SCREEN_WIDTH // 2, 100, center=True)
         for i, opt in enumerate(options):
@@ -44,10 +44,8 @@ class UI:
         pygame.draw.rect(self.screen, BLACK, box)
         pygame.draw.rect(self.screen, WHITE, box, 2)
         
-        # Desenha o texto da página atual
         self.draw_text(text, False, box.x + 20, box.y + 20)
         
-        # Indicador de página e botão pular
         indicator = f"{current_page + 1}/{total_pages}"
         self.draw_text(indicator, False, box.right - 40, box.bottom - 30, GRAY, center=True)
         self.draw_text("'E' Próximo", False, box.right - 100, box.y + 60, YELLOW)
@@ -63,10 +61,9 @@ class UI:
         # Log
         self.draw_text(log_text, False, SCREEN_WIDTH // 2, 52, YELLOW, center=True)
 
-        # Ações (Inferior) - Lógica de centralização corrigida
+        # Ações (Inferior)
         y = SCREEN_HEIGHT - 60
         num_actions = len(action_menu)
-        # Divide a tela em seções iguais para cada botão
         section_width = SCREEN_WIDTH // num_actions
         
         for i, act in enumerate(action_menu):
@@ -75,7 +72,5 @@ class UI:
             if act.lower().startswith("ataque pesado") and heavy_cd > 0:
                 label += f" (CD:{heavy_cd})"
                 color = GRAY
-            
-            # O X é o centro da seção correspondente
             center_x = (i * section_width) + (section_width // 2)
             self.draw_text(label, False, center_x, y, color, center=True)
