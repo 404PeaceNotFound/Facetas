@@ -1,7 +1,7 @@
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 30
-TITLE = "Fighting Adventure Prototype"
+TITLE = "Facetas"
 
 # Mapa
 MAP_WIDTH = 2000

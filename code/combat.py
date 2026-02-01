@@ -1,19 +1,34 @@
 import pygame
-from constants import HEAVY_ATTACK_COOLDOWN
+from constants import HEAVY_ATTACK_COOLDOWN, WHITE, GREEN
 
 class CombatSystem:
     def __init__(self, player, enemy):
         self.player = player
         self.enemy = enemy
         self.round = 1
-        self.state = "INPUT"   # INPUT, WAIT, ENEMY
-        self.actions = ["Ataque Basico", "Ataque Pesado", "Defesa"]
+        self.state = "INPUT"
+        self.actions = ["Ataque Básico", "Ataque Pesado", "Defesa"]
         self.selected = 0
         self.is_defending = False
         self.log = "Início do combate"
         self.finished = False
         self.result = None
-        self.wait_timer = 0  # frames to simulate delay
+        self.wait_timer = 0
+        
+        # --- POSICIONAMENTO AUTOMÁTICO AO INICIAR ---
+        # Define o centro da arena baseada na posição original do inimigo
+        arena_center_x = self.enemy.rect.centerx
+        
+        # Afasta o player para a esquerda e inimigo para a direita
+        distancia_do_centro = 150
+        
+        # Ajusta Player
+        self.player.rect.right = arena_center_x - distancia_do_centro
+        # Como estamos num combate, podemos alinhar o Y também se quiser
+        # self.player.rect.y = 400 
+
+        # Ajusta Inimigo
+        self.enemy.rect.left = arena_center_x + distancia_do_centro
 
     def handle_input(self, event):
         if self.state != "INPUT" or self.finished:
@@ -35,12 +50,12 @@ class CombatSystem:
         dmg = 0
         self.is_defending = False
 
-        if action == "Ataque Basico":
+        if action == "Ataque Básico":
             dmg = 1
             self.log = "Você usou Ataque Básico"
         elif action == "Ataque Pesado":
             dmg = 2
-            self.player.heavy_cd = HEAVY_ATTACK_COOLDOWN + 1
+            self.player.heavy_cd = HEAVY_ATTACK_COOLDOWN
             self.log = "Você usou Ataque Pesado"
         elif action == "Defesa":
             self.is_defending = True
@@ -54,7 +69,6 @@ class CombatSystem:
                 self.result = "WIN"
                 return
 
-        # passar para turno do inimigo com pequeno delay
         self.state = "WAIT"
         self.wait_timer = 30
 
@@ -65,7 +79,6 @@ class CombatSystem:
         if self.wait_timer > 0:
             self.wait_timer -= 1
             if self.wait_timer == 0:
-                # se inimigo ainda vivo, ele ataca
                 if self.enemy.alive:
                     self.enemy_turn()
                 else:
@@ -73,9 +86,7 @@ class CombatSystem:
                     self.result = "WIN"
             return
 
-        # reduzir cooldowns quando volta ao INPUT
         if self.state == "ENEMY":
-            # já processado enemy_turn, voltar para input
             self.state = "INPUT"
             self.round += 1
             if self.player.heavy_cd > 0:
@@ -95,6 +106,5 @@ class CombatSystem:
             self.result = "LOSE"
             return
 
-        # fim do turno inimigo
         self.is_defending = False
         self.state = "ENEMY"

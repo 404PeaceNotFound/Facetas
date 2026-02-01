@@ -20,6 +20,11 @@ class Game:
         self.running = True
         self.state = STATE_MENU
         self.victory = False
+        
+        # Variáveis para controle de diálogo
+        self.dialog_pages = []
+        self.current_page_index = 0
+        
         self.reset_world()
 
     def reset_world(self):
@@ -27,17 +32,15 @@ class Game:
         self.map = GameMap()
         self.camera = Camera()
         self.enemies = [
-            # inimigo 1 (tutorial)
-            Enemy(600, hp=4, damage=5),
-            
-            # inimigo 2 (mais díficil)
-            Enemy(1200, hp=6, damage=8), 
-
-            # inimigo 3 (maior dificuldade)
-            Enemy(1800, hp=7, damage=15, is_boss=True)]
-        self.npcs = [NPC(300, "Cuidado! Inimigos à frente.")]
+            Enemy(600, hp=4, damage=4),
+            Enemy(1200, hp=6, damage=6), 
+            Enemy(1800, hp=10, damage=10, is_boss=True)
+        ]
+        # NPC com texto quebrado por \n
+        self.npcs = [
+            NPC(300, "Cuidado! Inimigos à frente.\nAs setas selecionam a ação.\nPressione 'Enter' para usar a ação.")
+        ]
         self.combat = None
-        self.active_dialog = None
         self.dialogo_ja_apareceu = False
         self.victory = False
 
@@ -74,19 +77,19 @@ class Game:
 
         elif self.state == STATE_CREDITS:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                # self.running = False
                 self.state = STATE_MENU
 
-        elif self.state == STATE_EXPLORE:
-            # if event.type == pygame.KEYDOWN and event.key == pygame.K_e and self.active_dialog:
-            #     self.active_dialog = None
-            pass
-            
         elif self.state == STATE_DIALOG:
+            # Avança o texto ao pressionar E
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                # Verifica se ainda tem páginas
+                if self.current_page_index < len(self.dialog_pages) - 1:
+                    self.current_page_index += 1
+                else:
+                    # Fim do diálogo
                     self.state = STATE_EXPLORE
-                    self.active_dialog = None
-                    self.dialogo_ja_apareceu = True # isso significa que o diálogo já aconteceu
+                    self.dialogo_ja_apareceu = True
+                    self.dialog_pages = []
 
         elif self.state == STATE_COMBAT and self.combat:
             self.combat.handle_input(event)
@@ -100,17 +103,18 @@ class Game:
             self.player.update()
             self.camera.update_follow(self.player.rect)
 
-            # NPC collision -> dialog
-            self.active_dialog = None
+            # Colisão NPC -> Dialogo
             for npc in self.npcs:
                 if npc.active and self.player.rect.colliderect(npc.rect):
-
                     if not self.dialogo_ja_apareceu:
                         self.state = STATE_DIALOG
-                        self.active_dialog = npc.text
+                        # Divide o texto do NPC pelo caractere \n
+                        raw_text = npc.text
+                        self.dialog_pages = raw_text.split('\n')
+                        self.current_page_index = 0
                     break
 
-            # Enemy collision -> combat
+            # Colisão Inimigo -> Combate
             for e in self.enemies:
                 if e.alive and self.player.rect.colliderect(e.rect):
                     self.start_combat(e)
@@ -128,13 +132,17 @@ class Game:
                         self.state = STATE_EXPLORE
                 else:
                     self.state = STATE_GAME_OVER
-                # unlock camera
+                
+                # Reseta câmera para seguir o player após combate
                 self.camera.update_follow(self.player.rect)
                 self.combat = None
 
     def start_combat(self, enemy):
-        self.state = STATE_COMBAT
+        # Centraliza a câmera na posição original do inimigo (centro da arena)
         self.camera.center_on(enemy.rect.centerx)
+        self.state = STATE_COMBAT
+        
+        # O construtor do CombatSystem agora posiciona os bonecos
         self.combat = CombatSystem(self.player, enemy)
 
     def draw(self):
@@ -145,14 +153,13 @@ class Game:
 
         if self.state == STATE_CREDITS:
             self.screen.fill(BLACK)
-            self.ui.draw_text("Desenvolvido por:", "big", 50, 50)
-            self.ui.draw_text("Game Design: Thiago & Dudu", "small", 50, 150)
-            self.ui.draw_text("Game Dev: Yuri & Vitor", "small", 50, 200)
+            self.ui.draw_text("Créditos", True, 50, 50)
+            self.ui.draw_text("Dev: User", False, 50, 150)
             self.ui.draw_text("Pressione ENTER para Sair", False, 50, 500, RED)
             pygame.display.flip()
             return
 
-        # Mundo (EXPLORE / DIALOG / COMBAT / GAME_OVER)
+        # Desenho do Mundo
         self.screen.fill(BLACK)
         self.map.draw(self.screen, self.camera.x)
 
@@ -162,15 +169,16 @@ class Game:
             e.draw(self.screen, self.camera.x)
         self.player.draw(self.screen, self.camera.x)
 
-        if self.state == STATE_EXPLORE and self.active_dialog:
-            # self.ui.draw_dialog(self.active_dialog)
-            pass
-
         if self.state == STATE_DIALOG:
-
-            self.ui.draw_dialog(self.active_dialog)
+            # Passamos o texto atual e contagem de páginas para UI
+            current_text = self.dialog_pages[self.current_page_index]
+            self.ui.draw_dialog(current_text, self.current_page_index, len(self.dialog_pages))
 
         if self.state == STATE_COMBAT and self.combat:
+            # Desenha Arena (opcional, para debug visual)
+            # arena_rect = pygame.Rect(SCREEN_WIDTH//2 - 200, SCREEN_HEIGHT//2 - 150, 400, 300)
+            # pygame.draw.rect(self.screen, (30,30,30), arena_rect, 1)
+            
             self.ui.draw_combat_hud(
                 self.player.hp,
                 self.combat.enemy.hp,
