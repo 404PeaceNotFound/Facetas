@@ -1,4 +1,5 @@
 import pygame
+import os
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, BLACK, RED, YELLOW, GRAY, BLUE, GREEN
 
 class UI:
@@ -6,6 +7,16 @@ class UI:
         self.screen = screen
         self.font_big = pygame.font.Font(None, 48)
         self.font_small = pygame.font.Font(None, 24)
+        base_dir = os.path.dirname(__file__)
+        img_path = os.path.join(base_dir, "assets", "images", "menu_background.jpg")
+        print(f"DEBUG: Tentando carregar imagem de: {img_path}")
+
+        try:
+            self.bg_menu = pygame.image.load(img_path).convert()
+            self.bg_menu = pygame.transform.scale(self.bg_menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        except FileNotFoundError:
+            print(f"ERRO: Não achei a imagem em {img_path}")
+            self.bg_menu = None
 
     def draw_text(self, text, big, x, y, color=WHITE, center=False):
         font = self.font_big if big else self.font_small
@@ -18,10 +29,12 @@ class UI:
         self.screen.blit(surf, rect)
 
     def draw_menu(self, options, selected_index):
-        self.background_image = pygame.image.load("./Facetas/code/assets/images/menu_background.jpg")
-        self.background_image = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.screen.blit(self.background_image, (0, 0))
-        self.draw_text("Facetas", 100, SCREEN_WIDTH // 2, 100, center=True)
+        if self.bg_menu:
+            self.screen.blit(self.bg_menu, (0, 0))
+        else:
+            self.screen.fill(BLACK) # Se a imagem falhou, pinta de preto
+
+        self.draw_text("Facetas", True, SCREEN_WIDTH // 2, 100, center=True)
         for i, opt in enumerate(options):
             color = YELLOW if i == selected_index else WHITE
             self.draw_text(opt, False, SCREEN_WIDTH // 2, 220 + i * 40, color, center=True)
