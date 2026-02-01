@@ -26,7 +26,15 @@ class Game:
         self.player = Player()
         self.map = GameMap()
         self.camera = Camera()
-        self.enemies = [Enemy(600), Enemy(1200), Enemy(1800, is_boss=True)]
+        self.enemies = [
+            # inimigo 1 (tutorial)
+            Enemy(600, hp=4, damage=5),
+            
+            # inimigo 2 (mais díficil)
+            Enemy(1200, hp=6, damage=8), 
+
+            # inimigo 3 (maior dificuldade)
+            Enemy(1800, hp=7, damage=15, is_boss=True)]
         self.npcs = [NPC(300, "Cuidado! Inimigos à frente.")]
         self.combat = None
         self.active_dialog = None
@@ -37,6 +45,8 @@ class Game:
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.running = False
                 else:
                     self.handle_event(event)

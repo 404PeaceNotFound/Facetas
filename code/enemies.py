@@ -16,13 +16,13 @@ class NPC:
         pygame.draw.rect(screen, self.color, r)
 
 class Enemy:
-    def __init__(self, x, is_boss=False, y=400, w=60, h=100):
+    def __init__(self, x, hp, damage, is_boss=False, y=400, w=60, h=100):
         self.rect = pygame.Rect(x, y, w, h)
         self.is_boss = is_boss
         self.color = YELLOW if is_boss else RED
-        self.max_hp = 4 if is_boss else 2
+        self.max_hp = hp
         self.hp = self.max_hp
-        self.damage = 15 if is_boss else 10
+        self.damage = damage
         self.alive = True
 
     def draw(self, screen, cam_x):
