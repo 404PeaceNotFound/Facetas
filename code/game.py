@@ -157,7 +157,8 @@ class Game:
         if self.state == STATE_CREDITS:
             self.screen.fill(BLACK)
             self.ui.draw_text("Créditos", True, 50, 50)
-            self.ui.draw_text("Dev: User", False, 50, 150)
+            self.ui.draw_text("Game Design: Thiago & Dudu", "small", 50, 150)
+            self.ui.draw_text("Game Dev: Yuri & Vitor", "small", 50, 200)
             self.ui.draw_text("Pressione ENTER para Sair", False, 50, 500, RED)
             pygame.display.flip()
             return
