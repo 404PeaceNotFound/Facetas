@@ -9,7 +9,7 @@ class Player:
         
         # 1. Carregar imagem parada e redimensionar
         # Usamos self. para que essas variáveis pertençam ao jogador
-        img_parado = pygame.image.load('Facetas/code/assets/images/sprite_homem_parado.png').convert_alpha()
+        img_parado = pygame.image.load('code/assets/images/sprite_homem_parado.png').convert_alpha()
         self.mainCaracterRedimision = pygame.transform.scale(img_parado, (100, 150))
         
         # Definimos self.image como a imagem atual que será desenhada
@@ -17,7 +17,7 @@ class Player:
         
         # 2. Carregar lista de sprites de movimento
         self.sprites_andando = [
-            pygame.transform.scale(pygame.image.load(f'Facetas/code/assets/images/movimentoHomemEsquerda{i}.png').convert_alpha(), (100, 150))
+            pygame.transform.scale(pygame.image.load(f'code/assets/images/movimentoHomemEsquerda{i}.png').convert_alpha(), (100, 150))
             for i in range(1, 5)
         ]
         
