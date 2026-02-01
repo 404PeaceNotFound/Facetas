@@ -30,6 +30,7 @@ class Game:
         self.npcs = [NPC(300, "Cuidado! Inimigos à frente.")]
         self.combat = None
         self.active_dialog = None
+        self.dialogo_ja_apareceu = False
         self.victory = False
 
     def run(self):
@@ -67,8 +68,15 @@ class Game:
                 self.state = STATE_MENU
 
         elif self.state == STATE_EXPLORE:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_e and self.active_dialog:
-                self.active_dialog = None
+            # if event.type == pygame.KEYDOWN and event.key == pygame.K_e and self.active_dialog:
+            #     self.active_dialog = None
+            pass
+            
+        elif self.state == STATE_DIALOG:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                    self.state = STATE_EXPLORE
+                    self.active_dialog = None
+                    self.dialogo_ja_apareceu = True # isso significa que o diálogo já aconteceu
 
         elif self.state == STATE_COMBAT and self.combat:
             self.combat.handle_input(event)
@@ -86,7 +94,10 @@ class Game:
             self.active_dialog = None
             for npc in self.npcs:
                 if npc.active and self.player.rect.colliderect(npc.rect):
-                    self.active_dialog = npc.text
+
+                    if not self.dialogo_ja_apareceu:
+                        self.state = STATE_DIALOG
+                        self.active_dialog = npc.text
                     break
 
             # Enemy collision -> combat
@@ -142,6 +153,11 @@ class Game:
         self.player.draw(self.screen, self.camera.x)
 
         if self.state == STATE_EXPLORE and self.active_dialog:
+            # self.ui.draw_dialog(self.active_dialog)
+            pass
+
+        if self.state == STATE_DIALOG:
+
             self.ui.draw_dialog(self.active_dialog)
 
         if self.state == STATE_COMBAT and self.combat:
